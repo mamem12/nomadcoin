@@ -1,3 +1,3 @@
-module main.go
+module github.com/nomadcoin
 
 go 1.19
