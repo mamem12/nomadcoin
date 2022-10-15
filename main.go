@@ -1,7 +1,9 @@
 package main
 
-import "github.com/nomadcoin/explorer"
+import (
+	"github.com/nomadcoin/rest"
+)
 
 func main() {
-	explorer.Start()
+	rest.Start(4000)
 }

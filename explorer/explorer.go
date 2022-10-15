@@ -10,7 +10,6 @@ import (
 )
 
 const (
-	port        = ":4000"
 	templateDir = "explorer/templates/"
 )
 
@@ -39,11 +38,13 @@ func add(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func Start() {
+func Start(port int) {
+	handler := http.NewServeMux()
+
 	templates = template.Must(template.ParseGlob(templateDir + "pages/*.gohtml"))
 	templates = template.Must(templates.ParseGlob(templateDir + "partials/*.gohtml"))
-	http.HandleFunc("/", home)
-	http.HandleFunc("/add", add)
-	fmt.Printf("local host http://localhost%s\n", port)
-	log.Fatal(http.ListenAndServe(port, nil))
+	handler.HandleFunc("/", home)
+	handler.HandleFunc("/add", add)
+	fmt.Printf("local host http://localhost:%d\n", port)
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", port), handler))
 }
