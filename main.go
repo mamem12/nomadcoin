@@ -1,9 +1,11 @@
 package main
 
 import (
-	"github.com/nomadcoin/rest"
+	"github.com/nomadcoin/blockchain"
+	"github.com/nomadcoin/cli"
 )
 
 func main() {
-	rest.Start(4000)
+	blockchain.Blockchain()
+	cli.Start()
 }

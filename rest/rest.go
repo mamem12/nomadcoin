@@ -5,11 +5,9 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"strconv"
 
 	"github.com/gorilla/mux"
 	"github.com/nomadcoin/blockchain"
-	"github.com/nomadcoin/utils"
 )
 
 var port string
@@ -54,36 +52,34 @@ func documentation(w http.ResponseWriter, r *http.Request) {
 			Payload:     "data:string",
 		},
 		{
-			URL:         url("/blocks/{height}"),
+			URL:         url("/blocks/{hash}"),
 			Method:      "GET",
 			Description: "See A Block",
 			Payload:     "data:string",
 		},
 	}
-	w.Header().Add("Content-Type", "application/json")
 	json.NewEncoder(w).Encode((data))
 }
 
 func blocks(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
-		w.Header().Add("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(blockchain.GetBlockchain().AllBlocks())
+		return
+		// json.NewEncoder(w).Encode(blockchain.GetBlockchain().AllBlocks())
 	case "POST":
-		var addBlockBody addBlockBody
-		utils.HandleErr(json.NewDecoder(r.Body).Decode(&addBlockBody))
-		blockchain.GetBlockchain().Addblock(addBlockBody.Message)
-		w.WriteHeader(http.StatusCreated)
+		return
+		// var addBlockBody addBlockBody
+		// utils.HandleErr(json.NewDecoder(r.Body).Decode(&addBlockBody))
+		// blockchain.GetBlockchain().Addblock(addBlockBody.Message)
+		// w.WriteHeader(http.StatusCreated)
 	}
 }
 
 func block(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	id, err := strconv.Atoi(vars["height"])
+	hash := vars["hash"]
 
-	utils.HandleErr(err)
-
-	block, err := blockchain.GetBlockchain().GetBlock(id)
+	block, err := blockchain.FindBlock(hash)
 
 	encoder := json.NewEncoder(w)
 
@@ -94,12 +90,20 @@ func block(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func jsonContentTypeMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Add("Content-Type", "application/json")
+		next.ServeHTTP(w, r)
+	})
+}
+
 func Start(aPort int) {
 	router := mux.NewRouter()
 	port = fmt.Sprintf(":%d", aPort)
+	router.Use(jsonContentTypeMiddleware)
 	router.HandleFunc("/", documentation).Methods("GET")
 	router.HandleFunc("/blocks", blocks).Methods("GET", "POST")
-	router.HandleFunc("/blocks/{height:[0-9]+}", block).Methods("GET")
+	router.HandleFunc("/blocks/{hash:[a-f0-9]+}", block).Methods("GET")
 	fmt.Printf("listening on http://localhost%s\n", port)
 	log.Fatal(http.ListenAndServe(port, router))
 }
