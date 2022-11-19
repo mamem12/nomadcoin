@@ -2,3 +2,4 @@
 ####
 # VSCode Rest Client extention 
 ####
+*.db
