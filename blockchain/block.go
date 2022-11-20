@@ -42,7 +42,6 @@ func (b *Block) restore(data []byte) {
 
 func FindBlock(hash string) (*Block, error) {
 	blockBytes := db.Block(hash)
-	fmt.Println(blockBytes)
 	if blockBytes == nil {
 		return nil, ErrNotFound
 	}

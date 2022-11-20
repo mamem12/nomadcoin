@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"runtime"
 
 	"github.com/nomadcoin/explorer"
 	"github.com/nomadcoin/rest"
@@ -14,7 +15,7 @@ func usage() {
 	fmt.Printf("please use the following commands:\n\n")
 	fmt.Printf("explorer: 	The start the HTML Explorer\n")
 	fmt.Printf("rest: 		The start the REST API(recommended)\n")
-	os.Exit(1)
+	runtime.Goexit()
 }
 
 func Start() {

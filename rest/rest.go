@@ -8,6 +8,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/nomadcoin/blockchain"
+	"github.com/nomadcoin/utils"
 )
 
 var port string
@@ -64,14 +65,13 @@ func documentation(w http.ResponseWriter, r *http.Request) {
 func blocks(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
-		return
-		// json.NewEncoder(w).Encode(blockchain.GetBlockchain().AllBlocks())
+		// return
+		json.NewEncoder(w).Encode(blockchain.Blockchain().Blocks())
 	case "POST":
-		return
-		// var addBlockBody addBlockBody
-		// utils.HandleErr(json.NewDecoder(r.Body).Decode(&addBlockBody))
-		// blockchain.GetBlockchain().Addblock(addBlockBody.Message)
-		// w.WriteHeader(http.StatusCreated)
+		var addBlockBody addBlockBody
+		utils.HandleErr(json.NewDecoder(r.Body).Decode(&addBlockBody))
+		blockchain.Blockchain().Addblock(addBlockBody.Message)
+		w.WriteHeader(http.StatusCreated)
 	}
 }
 
