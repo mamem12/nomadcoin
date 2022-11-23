@@ -2,6 +2,7 @@ package blockchain
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 
@@ -16,7 +17,7 @@ type Block struct {
 	Height     int    `json:"height"`
 	Difficulty int    `json:"difficulty"`
 	Nonce      int    `json:"nonce"`
-	TimeStamp  int    `json:"timestamp"`
+	Timestamp  int    `json:"timestamp"`
 }
 
 func (b *Block) persist() {
@@ -26,8 +27,9 @@ func (b *Block) persist() {
 func (b *Block) mine() {
 	target := strings.Repeat("0", b.Difficulty)
 	for {
-		b.TimeStamp = int(time.Now().Unix())
+		b.Timestamp = int(time.Now().Unix())
 		hash := utils.Hash(b)
+		fmt.Printf("Target:%s\nHash:%s\nNonce:%d\n\n", target, hash, b.Nonce)
 		if strings.HasPrefix(hash, target) {
 			b.Hash = hash
 			break

@@ -58,8 +58,8 @@ func (b *blockChain) Blocks() []*Block {
 func (b *blockChain) recalculateDifficulty() int {
 	allBlocks := b.Blocks()
 	newestBlock := allBlocks[0]
-	recalculatedBlock := allBlocks[difficultyInterval-1]
-	actualTime := (newestBlock.TimeStamp / 60) - (recalculatedBlock.TimeStamp / 60)
+	lastRecalculatedBlock := allBlocks[difficultyInterval-1]
+	actualTime := (newestBlock.Timestamp / 60) - (lastRecalculatedBlock.Timestamp / 60)
 	// 분단위 계산
 	expectedTime := difficultyInterval * blockInterval
 	if actualTime <= (expectedTime - allowedRange) {
@@ -67,14 +67,13 @@ func (b *blockChain) recalculateDifficulty() int {
 	} else if actualTime >= (expectedTime + allowedRange) {
 		return b.CurrentDifficulty - 1
 	}
-
 	return b.CurrentDifficulty
 }
 
 func (b *blockChain) Difficulty() int {
 	if b.Height == 0 {
 		return defaultDifficulty
-	} else if b.Height%defaultDifficulty == 0 {
+	} else if b.Height%difficultyInterval == 0 {
 		return b.recalculateDifficulty()
 	} else {
 		return b.CurrentDifficulty
