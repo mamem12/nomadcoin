@@ -2,7 +2,6 @@ package blockchain
 
 import (
 	"errors"
-	"fmt"
 	"strings"
 	"time"
 
@@ -11,13 +10,13 @@ import (
 )
 
 type Block struct {
-	Data       string `json:"data"`
-	Hash       string `json:"hash"`
-	PrevHash   string `json:"prevHash,omitempty"`
-	Height     int    `json:"height"`
-	Difficulty int    `json:"difficulty"`
-	Nonce      int    `json:"nonce"`
-	Timestamp  int    `json:"timestamp"`
+	Hash         string `json:"hash"`
+	PrevHash     string `json:"prevHash,omitempty"`
+	Height       int    `json:"height"`
+	Difficulty   int    `json:"difficulty"`
+	Nonce        int    `json:"nonce"`
+	Timestamp    int    `json:"timestamp"`
+	Transactions []*Tx  `json:"transactions"`
 }
 
 func (b *Block) persist() {
@@ -29,7 +28,6 @@ func (b *Block) mine() {
 	for {
 		b.Timestamp = int(time.Now().Unix())
 		hash := utils.Hash(b)
-		fmt.Printf("Target:%s\nHash:%s\nNonce:%d\n\n", target, hash, b.Nonce)
 		if strings.HasPrefix(hash, target) {
 			b.Hash = hash
 			break
@@ -39,27 +37,26 @@ func (b *Block) mine() {
 	}
 }
 
-func CreateBlock(data, prevHash string, height int) *Block {
+func (b *Block) restore(data []byte) {
+	utils.FromBytes(b, data)
+}
+
+func CreateBlock(prevHash string, height int) *Block {
 	block := &Block{
-		Data:       data,
 		Hash:       "",
 		PrevHash:   prevHash,
 		Height:     height,
-		Difficulty: Blockchain().Difficulty(),
+		Difficulty: difficulty(Blockchain()),
 		Nonce:      0,
 	}
 
 	block.mine()
-
+	block.Transactions = Mempool.TxToConfirm()
 	block.persist()
 	return block
 }
 
 var ErrNotFound = errors.New("block not found")
-
-func (b *Block) restore(data []byte) {
-	utils.FromBytes(b, data)
-}
 
 func FindBlock(hash string) (*Block, error) {
 	blockBytes := db.Block(hash)
