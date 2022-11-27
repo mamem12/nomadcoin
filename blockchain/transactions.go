@@ -93,7 +93,7 @@ func makeTx(from, to string, amount int) (*Tx, error) {
 	total := 0
 	uTxOuts := UTxOutsByAddress(from, Blockchain())
 	for _, uTxOut := range uTxOuts {
-		if total > amount {
+		if total >= amount {
 			break
 		}
 		txIn := &TxIn{uTxOut.TxID, uTxOut.Index, from}

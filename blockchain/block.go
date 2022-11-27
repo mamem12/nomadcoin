@@ -41,12 +41,12 @@ func (b *Block) restore(data []byte) {
 	utils.FromBytes(b, data)
 }
 
-func CreateBlock(prevHash string, height int) *Block {
+func CreateBlock(prevHash string, height, diff int) *Block {
 	block := &Block{
 		Hash:       "",
 		PrevHash:   prevHash,
 		Height:     height,
-		Difficulty: difficulty(Blockchain()),
+		Difficulty: diff,
 		Nonce:      0,
 	}
 
