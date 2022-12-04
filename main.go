@@ -6,5 +6,4 @@ func main() {
 	// defer db.Close()
 	// cli.Start()
 	wallet.Wallet()
-	// branch test
 }
