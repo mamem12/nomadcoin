@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/nomadcoin/utils"
+	"github.com/nomadcoin/wallet"
 )
 
 const (
@@ -119,7 +120,7 @@ func makeTx(from, to string, amount int) (*Tx, error) {
 
 func (m *mempool) AddTx(to string, amount int) error {
 
-	tx, err := makeTx("MAMEM", to, amount)
+	tx, err := makeTx(wallet.Wallet().Address, to, amount)
 	if err != nil {
 		return err
 	}
@@ -130,7 +131,7 @@ func (m *mempool) AddTx(to string, amount int) error {
 }
 
 func (m *mempool) TxToConfirm() []*Tx {
-	coinbase := makeCoinbaseTx("MAMEM")
+	coinbase := makeCoinbaseTx(wallet.Wallet().Address)
 	txs := m.Txs
 	txs = append(txs, coinbase)
 	m.Txs = nil
