@@ -5,7 +5,9 @@ import (
 	"crypto/elliptic"
 	"crypto/rand"
 	"crypto/x509"
+	"encoding/hex"
 	"fmt"
+	"math/big"
 	"os"
 
 	"github.com/nomadcoin/utils"
@@ -56,12 +58,58 @@ func addressFromKey(key *ecdsa.PrivateKey) string {
 	return fmt.Sprintf("%x", z)
 }
 
+func Sing(payload string, w *wallet) string {
+	payloadAsBytes, err := hex.DecodeString(payload)
+	utils.HandleErr(err)
+
+	r, s, err := ecdsa.Sign(rand.Reader, nil, payloadAsBytes)
+	utils.HandleErr(err)
+
+	signature := append(r.Bytes(), s.Bytes()...)
+
+	return fmt.Sprintf("%x", signature)
+}
+
+func restoreBigInt(payload string) (*big.Int, *big.Int, error) {
+	signBytes, err := hex.DecodeString(payload)
+
+	if err != nil {
+		return nil, nil, err
+	}
+
+	firstHalfBytes := signBytes[:len(signBytes)/2]
+	secondHalfBytes := signBytes[len(signBytes)/2:]
+
+	bigA, bigB := big.Int{}, big.Int{}
+	bigA.SetBytes(firstHalfBytes)
+	bigB.SetBytes(secondHalfBytes)
+
+	return &bigA, &bigB, nil
+}
+
+func Verify(signature, payload, address string) bool {
+	r, s, err := restoreBigInt(signature)
+	utils.HandleErr(err)
+
+	x, y, err := restoreBigInt(address)
+	utils.HandleErr(err)
+
+	PUBKey := ecdsa.PublicKey{
+		Curve: elliptic.P256(),
+		X:     x,
+		Y:     y,
+	}
+
+	payloadAsBytes, err := hex.DecodeString(payload)
+	utils.HandleErr(err)
+
+	return ecdsa.Verify(&PUBKey, payloadAsBytes, r, s)
+}
+
 func Wallet() *wallet {
-	// has a wallet already?
 	if w == nil {
 		w = &wallet{}
 		if hasWalletFile() {
-			// restore from file
 			w.PRIKey = restoreKey()
 		} else {
 			key := createPRIKey()
